@@ -45,6 +45,11 @@ escape-string-regexp@^1.0.5:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
+flashtext.js@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/flashtext.js/-/flashtext.js-1.0.5.tgz#d5872da63fdfd62899e5c4a0a75eed60bd070a9d"
+  integrity sha512-CKJ81wwqTQRawc+t7V1sirUssb9/I9n461cOxTqqPq/nrmeVNtwyeOp7pU85DtuSDmfMepQrF3zvXGxd5a5DVQ==
+
 has-flag@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-3.0.0.tgz#b5d454dc2199ae225699f3467e5a07f3b955bafd"
