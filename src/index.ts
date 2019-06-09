@@ -50,6 +50,10 @@ function testSearchString(
 
   const proc = new processor(true);
   eachWordPair.forEach(pair => {
+    // skip blank lines and comments
+    if (pair === "" || pair[0] === "#") {
+      return;
+    }
     const pieces = pair.split("|");
 
     const wordError = pieces[0];

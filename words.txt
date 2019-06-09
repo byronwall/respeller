@@ -19490,6 +19490,8 @@ zlot|slot
 zoon|zoom, zoon,
 zuser|user
 évaluate|evaluate
+
+# added from Excel book
 rnage|range
 posiiton|position
 givne|given
