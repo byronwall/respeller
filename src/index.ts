@@ -14,9 +14,7 @@ commander
   .action(files => {
     console.log(chalk.yellow("== List of spelling errors =="));
 
-    console.log(files);
-
-    testSearchString(files, commander["wordFile"]);
+    testSearchString(files, commander["wordFile"], false);
   });
 
 commander
@@ -25,6 +23,8 @@ commander
   .description("Replace spelling errors in files")
   .action(files => {
     console.log(chalk.yellow("== Replace errors =="), chalk.blue(files));
+
+    testSearchString(files, commander["wordFile"], true);
   });
 
 if (
@@ -36,17 +36,45 @@ if (
 
 commander.parse(process.argv);
 
-function testSearchString(files: string[], wordListPath: string) {
+function testSearchString(
+  files: string[],
+  wordListPath: string | undefined,
+  shouldFix: boolean
+) {
+  if (wordListPath === undefined) {
+    wordListPath = "words.txt";
+  }
+
   const allWords = fs.readFileSync(wordListPath, "utf8");
   const eachWordPair = allWords.split("\n");
 
-  const proc = new processor();
+  const proc = new processor(true);
   eachWordPair.forEach(pair => {
     const pieces = pair.split("|");
+
+    const wordError = pieces[0];
+
     if (pieces[1] === undefined) {
-      proc.addKeyword(pieces[0]);
+      proc.addKeyword(wordError);
     } else {
-      proc.addKeyword(pieces[0], pieces[1]);
+      // check if the dict offers multiple options
+
+      let replacement = pieces[1];
+      const replParts = replacement.split(",");
+
+      // TODO: only replace behind a flag... otherwise skip
+      if (replParts.length > 1) {
+        replacement = replParts[0].trim();
+      }
+
+      proc.addKeyword(wordError, replacement);
+      // add a capitalized option also
+      if (wordError[0].toLowerCase() == wordError[0]) {
+        const newSearch = wordError[0].toUpperCase() + wordError.substring(1);
+        const newRepl = replacement[0].toUpperCase() + replacement.substring(1);
+
+        proc.addKeyword(newSearch, newRepl);
+      }
     }
   });
 
@@ -64,11 +92,16 @@ function testSearchString(files: string[], wordListPath: string) {
 
       const found = proc.extractKeywords(data);
       if (found.length > 0) {
-        console.log("found", file, found);
+        console.log(file, found);
 
-        const newString = proc.replaceKeywords(data);
-
-        console.log("new text", newString);
+        if (shouldFix) {
+          const newString = proc.replaceKeywords(data);
+          fs.writeFile(file, newString, err => {
+            if (err) {
+              console.error("error saving new file", err);
+            }
+          });
+        }
       }
     });
   });
