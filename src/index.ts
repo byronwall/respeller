@@ -22,7 +22,7 @@ commander
   .alias("r")
   .description("Replace spelling errors in files")
   .action(files => {
-    console.log(chalk.yellow("== Replace errors =="), chalk.blue(files));
+    console.log(chalk.yellow("== Replace errors =="));
 
     testSearchString(files, commander["wordFile"], true);
   });

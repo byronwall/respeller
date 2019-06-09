@@ -1,7 +1,9 @@
 Initial version:
-    ☐ Ability to replace the updated text in live file
-    ☐ Create a useful word list from other peoples lists
     ☐ Provide a simple way to add new entries to the word list
     ☐ Allow the word list to live in a default location
     ☐ Allow for word lists to be loaded from multiple spots
-    ☐ Determine how fast the program is using the Excel book
+
+Archive:
+  ✔ Determine how fast the program is using the Excel book @done(19-06-08 23:52) @project(Initial version)
+  ✔ Ability to replace the updated text in live file @done(19-06-08 23:52) @project(Initial version)
+  ✔ Create a useful word list from other peoples lists @done(19-06-08 23:51) @project(Initial version)
