@@ -2,8 +2,6 @@ Initial version:
     ☐ Provide a simple way to add new entries to the word list
     ☐ Allow the word list to live in a default location
     ☐ Allow for word lists to be loaded from multiple spots
-
-Archive:
-  ✔ Determine how fast the program is using the Excel book @done(19-06-08 23:52) @project(Initial version)
-  ✔ Ability to replace the updated text in live file @done(19-06-08 23:52) @project(Initial version)
-  ✔ Create a useful word list from other peoples lists @done(19-06-08 23:51) @project(Initial version)
+    ☐ Determine if the `cspell` approach can be integrated into ts source or if it must be run from shell
+    ☐ Provide a simple interface to edit/modify the current replacement list
+    ☐ Build the project into a proper node CLI

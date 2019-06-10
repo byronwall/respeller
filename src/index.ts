@@ -2,6 +2,7 @@ import commander from "commander";
 import chalk from "chalk";
 import processor from "flashtext.js";
 import * as fs from "fs";
+import * as SpellChecker from "spellchecker";
 
 commander.version("1.0.0").description("Multi File Spelling Fixer");
 
@@ -25,6 +26,70 @@ commander
     console.log(chalk.yellow("== Replace errors =="));
 
     testSearchString(files, commander["wordFile"], true);
+  });
+
+commander
+  .command("check <files...>")
+  .alias("c")
+  .description("FInd spelling errors in files")
+  .action((files: string[]) => {
+    console.log(chalk.yellow("== Find spelling errors =="));
+
+    files.forEach(file => {
+      // kick out if not a real file
+      if (!fs.lstatSync(file).isFile()) {
+        return;
+      }
+
+      fs.readFile(file, "utf8", (err, data) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        const errors = SpellChecker.checkSpelling(data);
+
+        // TODO: work this up into a solid approach
+        // TODO: consider how to choose the right dictionary, add custom words, etc.
+
+        if (errors.length > 0) {
+          console.log(
+            file,
+            errors.map(rng => data.substring(rng.start, rng.end))
+          );
+        }
+      });
+    });
+  });
+
+commander
+  .command("build [file]")
+  .alias("b")
+  .description("Build a dict with first suggestion from word list")
+  .action(file => {
+    console.log(chalk.yellow("== Build errors =="));
+
+    if (file === undefined) {
+      file = "new_words.txt";
+    }
+
+    const newWords = fs.readFileSync(file, "utf8");
+
+    // split that into lines
+
+    const words = newWords.split("\n");
+
+    words.forEach(word => {
+      const replWords = SpellChecker.getCorrectionsForMisspelling(word);
+
+      console.log("new words?", word, replWords);
+    });
+
+    // check each word against the dict to see what is suggested
+
+    // outpt a new word list with the |
+
+    //console.log(newWords);
   });
 
 if (
