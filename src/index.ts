@@ -1,5 +1,5 @@
-import commander from "commander";
 import chalk from "chalk";
+import commander from "commander";
 import processor from "flashtext.js";
 import * as fs from "fs";
 import * as SpellChecker from "spellchecker";
@@ -7,6 +7,10 @@ import * as SpellChecker from "spellchecker";
 commander.version("1.0.0").description("Multi File Spelling Fixer");
 
 commander.option("-w, --wordFile [path]", "Path to a word list");
+commander.option(
+  "-p, --possibleWordFile [path]",
+  "Path to list of words to check"
+);
 
 commander
   .command("find <files...>")
@@ -35,30 +39,108 @@ commander
   .action((files: string[]) => {
     console.log(chalk.yellow("== Find spelling errors =="));
 
+    const newErrors = new Set<string>();
+
+    const fileReadPromises: Promise<string>[] = [];
+
     files.forEach(file => {
       // kick out if not a real file
       if (!fs.lstatSync(file).isFile()) {
         return;
       }
 
-      fs.readFile(file, "utf8", (err, data) => {
-        if (err) {
+      const fileProm = readFileAsync(file);
+      fileReadPromises.push(fileProm);
+
+      fileProm
+        .then(data => {
+          const errors = SpellChecker.checkSpelling(data);
+
+          // TODO: work this up into a solid approach
+          // TODO: consider how to choose the right dictionary, add custom words, etc.
+
+          if (errors.length > 0) {
+            const spellingErrors = errors.map(rng =>
+              data.substring(rng.start, rng.end)
+            );
+
+            spellingErrors.forEach(error => newErrors.add(error));
+
+            // TODO: add the ability to fix the errors right here
+          }
+        })
+        .catch(err => {
           console.error(err);
+        });
+    });
+
+    const fixesToOutput: string[] = [""];
+    const fixesToCheck: string[] = [""];
+    const veryBadErrors: string[] = [];
+    Promise.all(fileReadPromises).then(() => {
+      //console.log("all errors: ", newErrors);
+
+      newErrors.forEach(error => {
+        const fixes = SpellChecker.getCorrectionsForMisspelling(error);
+
+        if (fixes.length === 0) {
+          veryBadErrors.push(error);
           return;
         }
 
-        const errors = SpellChecker.checkSpelling(data);
+        const isErrorCapitalized =
+          error[0].toUpperCase() + error.substring(1).toLowerCase() === error;
 
-        // TODO: work this up into a solid approach
-        // TODO: consider how to choose the right dictionary, add custom words, etc.
+        let errorFix = error + "|" + fixes.join(", ");
+        if (isErrorCapitalized) {
+          errorFix = errorFix.toLowerCase();
+        }
 
-        if (errors.length > 0) {
-          console.log(
-            file,
-            errors.map(rng => data.substring(rng.start, rng.end))
-          );
+        if (fixes.length > 1) {
+          fixesToCheck.push(errorFix);
+          return;
+        }
+
+        // check if only the first letter is capitalized
+
+        const isLongEnough = error.length > 2;
+        const isAllLowerCase =
+          error.toLowerCase() === error || isErrorCapitalized;
+        const noPeriodInError = !(error.indexOf(".") > -1);
+        const noPeriodInFix = !(fixes[0].indexOf(".") > -1);
+
+        if (
+          isLongEnough &&
+          isAllLowerCase &&
+          noPeriodInError &&
+          noPeriodInFix
+        ) {
+          fixesToOutput.push(errorFix);
+        } else {
+          fixesToCheck.push(errorFix);
         }
       });
+
+      // for each error
+
+      // TODO: do a step to not add duplicates to the word lists
+
+      // append the fixes to the word file if avialable
+      const wordFile = commander["wordFile"];
+      if (wordFile !== undefined) {
+        fs.appendFileSync(wordFile, fixesToOutput.join("\n"));
+      } else {
+        console.log(fixesToOutput);
+      }
+
+      const possibleWordFile = commander["possibleWordFile"];
+      if (possibleWordFile !== undefined) {
+        fs.appendFileSync(possibleWordFile, fixesToCheck.join("\n"));
+      } else {
+        console.log(fixesToCheck);
+      }
+
+      console.log(veryBadErrors);
     });
   });
 
@@ -172,6 +254,15 @@ function testSearchString(
           });
         }
       }
+    });
+  });
+}
+
+function readFileAsync(filename: string) {
+  return new Promise<string>((resolve, reject) => {
+    fs.readFile(filename, "utf8", (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
     });
   });
 }
