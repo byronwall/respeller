@@ -1,8 +1,15 @@
+#!/usr/bin/env node
+
 import chalk from "chalk";
 import commander from "commander";
 import processor from "flashtext.js";
 import * as fs from "fs";
 import * as SpellChecker from "spellchecker";
+import * as path from "path";
+
+const dirName = __dirname;
+const defaultWordList = path.join(dirName, "..", "words.txt");
+const defaultNewWordList = path.join(dirName, "..", "new_words.txt");
 
 commander.version("1.0.0").description("Multi File Spelling Fixer");
 
@@ -11,6 +18,7 @@ commander.option(
   "-p, --possibleWordFile [path]",
   "Path to list of words to check"
 );
+commander.option("-s, --saveFixes", "Include to save easy fixes to words list");
 
 commander
   .command("find <files...>")
@@ -126,12 +134,16 @@ commander
       // TODO: do a step to not add duplicates to the word lists
 
       // append the fixes to the word file if avialable
-      const wordFile = commander["wordFile"];
-      if (wordFile !== undefined) {
-        fs.appendFileSync(wordFile, fixesToOutput.join("\n"));
+      const saveToWordFile = commander["saveFixes"];
+      if (saveToWordFile !== undefined) {
+        fs.appendFileSync(defaultWordList, fixesToOutput.join("\n"));
+        console.log(chalk.green("Words saved to the word list"));
       } else {
-        console.log(fixesToOutput);
+        console.log(
+          chalk.yellow("Word list not saved.  Use option -s or --saveFixes")
+        );
       }
+      console.log(fixesToOutput);
 
       const possibleWordFile = commander["possibleWordFile"];
       if (possibleWordFile !== undefined) {
@@ -152,7 +164,7 @@ commander
     console.log(chalk.yellow("== Build errors =="));
 
     if (file === undefined) {
-      file = "new_words.txt";
+      file = defaultNewWordList;
     }
 
     const newWords = fs.readFileSync(file, "utf8");
@@ -189,7 +201,7 @@ function testSearchString(
   shouldFix: boolean
 ) {
   if (wordListPath === undefined) {
-    wordListPath = "words.txt";
+    wordListPath = defaultWordList;
   }
 
   const allWords = fs.readFileSync(wordListPath, "utf8");
