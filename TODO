@@ -1,12 +1,9 @@
 Initial version:
     ☐ Provide a simple way to add new entries to the word list
     ☐ Allow for word lists to be loaded from multiple spots
-    ☐ Determine if the `cspell` approach can be integrated into ts source or if it must be run from shell
     ☐ Provide a simple interface to edit/modify the current replacement list
     ☐ Ability to get context around a word -- so many characters or words around it
     ☐ Ability to go interactive for fixing words after the first patch
     ☐ Ability to save certain fixes even when multiple words are recommended
-
-Archive:
-  ✔ Allow the word list to live in a default location @done(19-06-13 23:34) @project(Initial version)
-  ✔ Build the project into a proper node CLI @done(19-06-13 23:34) @project(Initial version)
+    
+    ☐ Fully integrate write-good with ability to fix or provide more context
