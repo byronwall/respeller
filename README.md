@@ -34,6 +34,12 @@ process the inputs using write-good
 respeller grammar *.md
 ```
 
+run through markdownlint checks
+
+```bash
+respeller markdown *.md
+```
+
 You can also save the "simple" mistakes to your words list and have them available for auto-corrections. Simple is defined as:
 
 - longer than 2 characters
