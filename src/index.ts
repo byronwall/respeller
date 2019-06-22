@@ -3,6 +3,8 @@ import chalk from "chalk";
 import commander from "commander";
 import * as path from "path";
 
+import markdownlint from "markdownlint";
+
 import { findAndReplaceErrorsUsingWordList } from "./findAndReplaceErrorsUsingWordList";
 import { processFilesWithSpellChecker } from "./processFilesWithSpellChecker";
 import { processFilesWithWriteGood } from "./processFilesWithWriteGood";
@@ -26,6 +28,34 @@ commander
   .action((files: string[]) => {
     console.log(chalk.yellow("== Summary of write-good errors =="));
     processFilesWithWriteGood(files);
+  });
+
+commander
+  .command("markdown <files...>")
+  .alias("m")
+  .description("Runs the markdownlint checks")
+  .action((files: string[]) => {
+    console.log(chalk.yellow("== Summary of markdownlint checks =="));
+    const options: markdownlint.MarkdownlintOptions = {
+      files,
+      config: {
+        "line-length": false,
+        "first-line-h1": false as any
+      }
+    };
+
+    markdownlint(options, (err, result) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+
+      for (let file in result) {
+        if (result.hasOwnProperty(file) && result[file].length > 0) {
+          console.log("files", file, result[file]);
+        }
+      }
+    });
   });
 
 commander
